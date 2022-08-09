@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class P15650 {
+public class P15651 {
     static int N,M;
     static int[] result;
     static StringBuilder sb = new StringBuilder();
@@ -33,7 +33,7 @@ public class P15650 {
             return;
         }
         //3루트
-        for (int i = s+1; i < N+1; i++) {
+        for (int i = 1; i < N+1; i++) {
             //4 벤
             //5 고우
             dfs(i, depth+1);
