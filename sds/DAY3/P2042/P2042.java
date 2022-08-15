@@ -6,104 +6,110 @@ public class P2042 {
 
     static int N, M, K;
     static long[] nums;
-    static long[] tree;
+    static Vortex[] tree;
+    static int level;
+    static int A,B;
+    static BufferedReader br;
+    static long answer;
 
-    static int command, param1;
-    static long param2;
-
-    static int S;
-
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws IOException {
         System.setIn(new FileInputStream("./input.txt"));
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        br = new BufferedReader(new InputStreamReader(System.in));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
         K = Integer.parseInt(st.nextToken());
-
-        nums = new long[N];
-
-        for (int i = 0; i < N; i++) {
-            nums[i] = Long.parseLong(br.readLine());
-        }
-
-        S = 1;
-        while (S < N) {
-            S *= 2;
-        }
-        tree = new long[S * 2];
-
-        initBU();
-        System.out.println(Arrays.toString(tree));
+        initTree(N);
         for (int i = 0; i < M+K; i++) {
             st = new StringTokenizer(br.readLine());
-            long a = Long.parseLong(st.nextToken());
-            long b = Long.parseLong(st.nextToken());
-            long c = Long.parseLong(st.nextToken());
+            int a,b;
+            a = Integer.parseInt(st.nextToken());
+            b = Integer.parseInt(st.nextToken());
+
+            if(a==1){
+                long c = Long.parseLong(st.nextToken());
+                long diff = c-tree[A+b-1].v;
+                change(1, b, diff);
+                // System.out.println(Arrays.toString(tree));
+
+            }
             if(a==2){
-                long result = query(1, S, 1, b, c);
-                System.out.println(result);
-            }else{
-                long diff = c- tree[(int)(S+b-1)];
-                update(1, S, 1, b, diff);
+                int c = Integer.parseInt(st.nextToken());
+                answer=0;
+                sum(b, c, 1);
+                System.out.println(answer);
+
             }
-        }
-        
-    }
 
-    static void initBU() {
-        // leaf node
-        for (int i = 0; i < N; i++) {
-            tree[i+S] =nums[i];
-        }
-        // inner node
-        for (int i = S-1; i >0; i--) {
-            tree[i] = tree[2*i]+tree[2*i+1];
-        }
-    }
-
-    static long query(int left, int right, int node, long queryLeft, long queryRight) {
-        
-        // no realtion
-        if (left>queryRight|| right<queryLeft){
-            return 0;
         }
 
-        // can judge
-        else if(left>=queryLeft&&right<=queryRight){
-            return tree[node];
-        }
-
-        // can't judge
-        else{
-            int mid = (left+right)/2;
-            long resultLeft = query(left, mid, node*2, queryLeft, queryRight);
-            long resultright = query(mid+1, right, node*2+1, queryLeft, queryRight);
-            return resultLeft+resultright;
-        }
-    }
-
-    static void update(int left, int right, int node, long target, long diff) {
-        // no relation
-        if (target<left||target>right){
-            return;
-        }
-        // yes relation
-        else{
-            tree[node] +=diff;
-            if (left!=right){
-                int mid = (left+right)/2;
-                update(left, mid, node*2, target, diff);
-                update(mid+1, right, node*2+1, target, diff);
-            }
-        }
-    }
-
-    // static long queryBU(int queryLeft, int queryRight) {
-    // }
-
-    // static void updateBU(int target, long value) {
-    // }
     
+    }
+    static void sum(int sum_l, int sum_r,int nodeIdx){
+        Vortex vor = tree[nodeIdx];
+        if(vor.r<sum_l||vor.l>sum_r) return;
+        else if(sum_l<=vor.l&&vor.r<=sum_r){
+            answer+= vor.v;
+        }else{
+            sum(sum_l, sum_r, 2*nodeIdx);
+            sum(sum_l, sum_r, 2*nodeIdx+1);
+        }
+
+
+    }
+
+    static void change(int nodeIdx, int b ,long diff){
+        
+        // int idx = A+b-1;
+        // long diff =to_value -tree[idx].v;
+        if(tree[nodeIdx].l<=b&&b<=tree[nodeIdx].r){
+            // System.out.println(nodeIdx);
+            tree[nodeIdx].v +=diff;
+            if(tree[nodeIdx].l==tree[nodeIdx].r) return;
+            change(2*nodeIdx, b, diff);
+            change(2*nodeIdx+1, b, diff);
+            
+        }
+        
+    }
+
+    static void initTree(int n) throws IOException{
+        A=1;
+        level=1;
+        while(n>A){
+            level+=1;
+            A*=2;
+        }
+        B = 2*A-1;
+        tree = new Vortex[B+1];
+        for (int i = A; i < 2*A; i++) {
+            if(i<A+n){
+                tree[i] = new Vortex(i-A+1,i-A+1, Long.parseLong(br.readLine()));
+            }else{
+                tree[i] = new Vortex(i-A+1,i-A+1, 0);
+
+            }
+        }
+        for (int i = A-1; i >0; i--) {
+            tree[i] = new Vortex(tree[2*i].l, tree[2*i+1].r, tree[2*i].v+tree[2*i+1].v);
+        }
+        // System.out.println(Arrays.toString(tree));
+
+    }
+}
+class Vortex{
+    int l,r;
+    long v;
+
+    public Vortex(int l, int r, long v) {
+        this.l = l;
+        this.r = r;
+        this.v = v;
+    }
+
+    @Override
+    public String toString() {
+        return "Vortex [l=" + l + ", r=" + r + ", v=" + v + "]";
+    }
 }
